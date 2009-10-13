@@ -19,6 +19,11 @@ kanban_label_quick-tasks_pane: Quick Tasks
 kanban_label_active_pane: Active
 kanban_label_testing_pane: Testing
 kanban_label_finished_pane: Finished
+kanban_label_defect: Defects
+kanban_label_architecture: Architecture
+kanban_label_feature: Features
+kanban_label_technicaldebt: Technical Debt
+kanban_label_color: Color
 kanban_label_limit: Maximum number of items
 
 kanban_label_staff_role: Role to use for Staffed Requests

@@ -41,4 +41,19 @@ module KanbansHelper
     end
     css
   end
+  def tracker_to_color(trackerid)
+    color = "background-color: "
+    if trackerid == @settings['category']['feature']['tracker'].to_i
+      color += @settings['category']['feature']['color'].to_s
+    elsif trackerid == @settings['category']['defect']['tracker'].to_i
+      color += @settings['category']['defect']['color'].to_s
+    elsif trackerid == @settings['category']['architecture']['tracker'].to_i
+      color += @settings['category']['architecture']['color'].to_s
+    elsif trackerid == @settings['category']['technicaldebt']['tracker'].to_i
+      color += @settings['category']['technicaldebt']['color'].to_s
+    else
+      color = ""
+    end
+    color
+  end
 end

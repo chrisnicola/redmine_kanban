@@ -1,0 +1,65 @@
+From ce9691002f0c6e877a36cf7dfaca2f98daf124f7 Mon Sep 17 00:00:00 2001
+From: chris <chris@i0-linux.localdomain>
+Date: Mon, 12 Oct 2009 10:59:32 -0700
+Subject: [PATCH] Adding color fields to settings
+
+---
+ app/views/settings/_kanban_settings.html.erb |   20 +++++++++++++++++++-
+ config/locales/en.yml                        |    4 ++++
+ 2 files changed, 23 insertions(+), 1 deletions(-)
+
+diff --git a/app/views/settings/_kanban_settings.html.erb b/app/views/settings/_kanban_settings.html.erb
+index 3964990..aab0861 100644
+--- a/app/views/settings/_kanban_settings.html.erb
++++ b/app/views/settings/_kanban_settings.html.erb
+@@ -16,7 +16,22 @@ def issue_status_pane(pane_name)
+       content_tag(:span, l(:kanban_label_limit), :style => "padding: 0 0.5em 0 3em;") + 
+       text_field_tag("settings[panes][#{pane_name}][limit]", limit ))
+       return status
++end
++   def tracker_color(category_name)
++    selected_tracker = @settings['category'][category_name] && @settings['category'][category_name]['tracker'] ? @settings['category'][category_name]['tracker'].to_i : ''
++    color = @settings['category'][category_name] && @settings['category'][category_name]['color'] ? @settings['category'][category_name]['color'].to_i : ''
++    tracker = content_tag(:p,
++      content_tag(:label, l("kanban_label_#{category_name}".to_sym)) +
++      select_tag("settings[category][#{category_name}][category]",
++                 content_tag(:option, '') +
++                 options_from_collection_for_select(Tracker.all,
++                                                    :id,
++                                                    :name,
++                                                    selected_tracker)) +
+ 
++      content_tag(:span, l(:kanban_label_limit), :style => "padding: 0 0.5em 0 3em;") +
++      text_field_tag("settings[category][#{category_name}][color]", color ))
++      return tracker
+ end
+ %>
+ 
+@@ -74,5 +89,8 @@ end
+     <%= content_tag(:span, l(:kanban_label_day_limit), :style => "padding: 0 0.5em 0 3em;") %>
+     <%= text_field_tag("settings[panes][finished][limit]", finished_limit ) %>
+   </p>
+-
++    <%= tracker_color('features') %>
++    <%= tracker_color('defects') %>
++    <%= tracker_color('architecture') %>
++    <%= tracker_color('technicaldebt') %>
+ </fieldset>
+diff --git a/config/locales/en.yml b/config/locales/en.yml
+index 4ee4c4f..faef9be 100644
+--- a/config/locales/en.yml
++++ b/config/locales/en.yml
+@@ -21,6 +21,10 @@ en:
+   kanban_label_active_pane: Active
+   kanban_label_testing_pane: Testing
+   kanban_label_finished_pane: Finished
++  kanban_label_defects: Defects
++  kanban_label_architecture: Architecture
++  kanban_label_features: Features
++  kanban_label_technicaldebt: Technical Debt
+   kanban_label_limit: Maximum number of items
+   kanban_label_day_limit: Number of days
+ 
+-- 
+1.6.0.4
+
