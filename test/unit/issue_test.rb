@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
-class KanbanTest < Test::Unit::TestCase
+class IssueTest < ActiveSupport::TestCase
   def shared_setup
     configure_plugin
   end
@@ -9,7 +9,7 @@ class KanbanTest < Test::Unit::TestCase
     should 'destroy any associated KanbanIssues' do
       shared_setup
       project = make_project_with_trackers
-      issue = Issue.make(:project => project,
+      issue = Issue.generate!(:project => project,
                          :tracker => project.trackers.first,
                          :status => IssueStatus.find_by_name('Active')
                          )

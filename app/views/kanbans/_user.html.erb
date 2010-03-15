@@ -1,6 +1,6 @@
   <div class="staff">
     <div id="user-<%= h user.id -%>" class="staffed-column pane user">
-      <%= h user.name %>
+      <%= link_to_user(user) %>
     </div>
     <% if pane_configured?('active') %>
     <div id="active-<%= h user.id -%>" class="staffed-column pane active user-<%= h user.id -%>">
@@ -15,6 +15,11 @@
     <% if pane_configured?('finished') %>
     <div id="finished-<%= h user.id -%>" class="staffed-column pane finished user-<%= h user.id -%>">
       <%= render(:partial => 'finished', :locals => {:user => user}) %>
+    </div>
+    <% end %>
+    <% if pane_configured?('canceled') %>
+    <div id="canceled-<%= h user.id -%>" class="staffed-column pane canceled user-<%= h user.id -%>">
+      <%= render(:partial => 'canceled', :locals => {:user => user}) %>
     </div>
     <% end %>
     <div style="clear:both"></div>

@@ -1,9 +1,9 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
-class KanbanTest < Test::Unit::TestCase
+class KanbanTest < ActiveSupport::TestCase
   def shared_setup
 
-    @user = User.make
+    @user = User.generate_with_protected!
     User.current = @user
   end
 
@@ -11,6 +11,7 @@ class KanbanTest < Test::Unit::TestCase
     setup {
       shared_setup
       setup_kanban_issues
+      make_member({:principal => @user, :project => @public_project}, [Role.last])
     }
 
     context "for incoming issues" do
@@ -38,7 +39,7 @@ class KanbanTest < Test::Unit::TestCase
 
       should "only get backlog issues up to the limit" do
         assert_equal 3, @kanban.backlog_issues.size # Priorities
-        assert_equal 15, @kanban.backlog_issues.values.collect.flatten.size # Issues
+        assert_equal 15, @kanban.backlog_issues.collect {|a| a[1]}.flatten.size # Issues
       end
 
       should "only get backlog issues with the configured status" do
@@ -58,9 +59,9 @@ class KanbanTest < Test::Unit::TestCase
       end
 
       should "group backlog issues by IssuePriority" do
-        assert_equal IssuePriority.find_by_name("High"),  @kanban.backlog_issues.keys[0]
-        assert_equal IssuePriority.find_by_name("Medium"),  @kanban.backlog_issues.keys[1]
-        assert_equal IssuePriority.find_by_name("Low"),  @kanban.backlog_issues.keys[2]
+        assert_equal IssuePriority.find_by_name("High"),  @kanban.backlog_issues.first.first
+        assert_equal IssuePriority.find_by_name("Medium"),  @kanban.backlog_issues[1].first
+        assert_equal IssuePriority.find_by_name("Low"),  @kanban.backlog_issues[2].first
       end
     end
 
@@ -72,7 +73,7 @@ class KanbanTest < Test::Unit::TestCase
       
       should "only get quick issues up to the limit" do
         assert_equal 2, @kanban.quick_issues.size # Priorities
-        assert_equal 5, @kanban.quick_issues.values.collect.flatten.size # Issues
+        assert_equal 5, @kanban.quick_issues.collect {|a| a[1]}.flatten.size # Issues
       end
 
       should "only get quick issues with the configured Backlog status" do
@@ -84,8 +85,8 @@ class KanbanTest < Test::Unit::TestCase
       end
 
       should "group quick issues by IssuePriority" do
-        assert_equal IssuePriority.find_by_name("High"),  @kanban.quick_issues.keys[0]
-        assert_equal IssuePriority.find_by_name("Medium"),  @kanban.quick_issues.keys[1]
+        assert_equal IssuePriority.find_by_name("High"),  @kanban.quick_issues.first.first
+        assert_equal IssuePriority.find_by_name("Medium"),  @kanban.quick_issues[1].first
       end
     end
 
@@ -114,7 +115,7 @@ class KanbanTest < Test::Unit::TestCase
       }
       
       should "only get all active issues" do
-        assert_equal 4, @kanban.active_issues.size # Users + Unknown
+        assert_equal 5, @kanban.active_issues.size # Users + Unknown
         assert_equal 18, @kanban.active_issues.values.collect.flatten.size # Issues
       end
 
@@ -141,7 +142,7 @@ class KanbanTest < Test::Unit::TestCase
       }
       
       should "only get all testing issues" do
-        assert_equal 4, @kanban.testing_issues.size # Users + Unknow
+        assert_equal 5, @kanban.testing_issues.size # Users + Unknow
         assert_equal 19, @kanban.testing_issues.values.collect.flatten.size # Issues
       end
 
@@ -189,9 +190,38 @@ class KanbanTest < Test::Unit::TestCase
       end
     end
 
+    context "for canceled issues" do
+      setup {
+        setup_canceled_issues
+        @kanban = Kanban.find
+      }
+
+      should "only get issues with the configured Canceled status" do
+        @kanban.canceled_issues.each do |user, issues|
+          issues.each do |issue|
+            assert_equal 'Rejected', issue.status.name
+          end
+        end
+      end
+
+      should "only get issues from the last 7 days" do
+        @kanban.canceled_issues.each do |user, issues|
+          issues.each do |issue|
+            assert issue.updated_on > 7.days.ago
+          end
+        end
+      end
+    
+      should "group issues by User" do
+        @kanban.canceled_issues.keys.each do |key|
+          assert key.is_a?(UnknownUser) || key.is_a?(User)
+        end
+      end
+    end
+
     should "set @users based on the configured role" do
       @kanban = Kanban.find
-      assert_equal 4, @kanban.users.length # +1 Unknown
+      assert_equal 5, @kanban.users.length # +1 Unknown
     end
   end
 
@@ -213,7 +243,7 @@ class KanbanTest < Test::Unit::TestCase
     context "with a new KanbanIssue" do
       should "create a new KanbanIssue" do
         KanbanIssue.destroy_all
-        issue = Issue.make({
+        issue = Issue.generate!({
                              :tracker => @public_project.trackers.first,
                              :project => @public_project
                            })
@@ -231,11 +261,11 @@ class KanbanTest < Test::Unit::TestCase
 
     context "with an existing KanbanIssue" do
       setup {
-        @issue = Issue.make({
+        @issue = Issue.generate!({
                              :tracker => @public_project.trackers.first,
                              :project => @public_project
                            })
-        @kanban_issue = KanbanIssue.make({
+        @kanban_issue = KanbanIssue.generate!({
                                            :issue => @issue,
                                            :user => nil,
                                            :state => 'none',
@@ -264,9 +294,9 @@ class KanbanTest < Test::Unit::TestCase
       @from = "incoming"
       @to = "active"
       @high_priority = IssuePriority.find_by_name("High")
-      @high_priority ||= IssuePriority.make(:name => "High") if @high_priority.nil?
+      @high_priority ||= IssuePriority.generate!(:name => "High") if @high_priority.nil?
 
-      @issue = Issue.make(:tracker => @public_project.trackers.first,
+      @issue = Issue.generate!(:tracker => @public_project.trackers.first,
                           :project => @public_project,
                           :priority => @high_priority,
                           :status => IssueStatus.find_by_name('New'))

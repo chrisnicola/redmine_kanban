@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
-class SanityTest < Test::Unit::TestCase
+class SanityTest < ActiveSupport::TestCase
   def test_is_sane
     assert true
   end
@@ -10,7 +10,7 @@ class SanityTest < Test::Unit::TestCase
   end
 
   should "connect to database" do
-    User.make(:firstname => 'Testing connection')
+    User.generate_with_protected!(:firstname => 'Testing connection')
     assert_equal 1, User.count(:all, :conditions => {:firstname => 'Testing connection'})
   end
 end

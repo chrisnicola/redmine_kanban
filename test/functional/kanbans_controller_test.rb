@@ -5,10 +5,10 @@ class KanbansControllerTest < ActionController::TestCase
     configure_plugin
     @private_project = make_project_with_trackers(:is_public => false)
     @public_project = make_project_with_trackers(:is_public => true)
-    @user = User.make
+    @user = User.generate_with_protected!
     @request.session[:user_id] = @user.id
-    @role = Role.make
-    @member = make_member({:user => @user, :project => @public_project}, @role)
+    @role = Role.generate!(:permissions => [:view_issues, :view_kanban, :edit_kanban])
+    @member = make_member({:principal => @user, :project => @public_project}, [@role])
   end
 
   context "permissions" do
@@ -51,6 +51,10 @@ class KanbansControllerTest < ActionController::TestCase
       shared_setup
       setup_kanban_issues
       setup_all_issues
+
+      # Bloody hack since @public_project is redefined....
+      @member = make_member({:principal => @user, :project => @public_project}, [@role])
+      assert @user.allowed_to?(:view_kanban, @public_project)
 
       get :show
     }
@@ -110,8 +114,8 @@ class KanbansControllerTest < ActionController::TestCase
         @from = "incoming"
         @to = "backlog"
         high_priority = IssuePriority.find_by_name("High")
-        high_priority ||= IssuePriority.make(:name => "High") if high_priority.nil?
-        @issue = Issue.make(:tracker => @public_project.trackers.first,
+        high_priority ||= IssuePriority.generate!(:name => "High") if high_priority.nil?
+        @issue = Issue.generate!(:tracker => @public_project.trackers.first,
                             :project => @public_project,
                             :priority => high_priority,
                             :status => IssueStatus.find_by_name('New'))
@@ -154,8 +158,8 @@ class KanbansControllerTest < ActionController::TestCase
         @from = "incoming"
         @to = "backlog"
         high_priority = IssuePriority.find_by_name("High")
-        high_priority ||= IssuePriority.make(:name => "High") if high_priority.nil?
-        @issue = Issue.make(:tracker => @public_project.trackers.first,
+        high_priority ||= IssuePriority.generate!(:name => "High") if high_priority.nil?
+        @issue = Issue.generate!(:tracker => @public_project.trackers.first,
                             :project => @public_project,
                             :priority => high_priority,
                             :status => IssueStatus.find_by_name('New'))

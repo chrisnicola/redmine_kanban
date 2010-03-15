@@ -41,6 +41,20 @@ module KanbansHelper
     end
     css
   end
+ 
+  def issue_icon_link(issue)
+    if Setting.gravatar_enabled? && issue.assigned_to
+      img = avatar(issue.assigned_to, {
+                     :class => 'gravatar icon-gravatar',
+                     :size => 10,
+                     :title => l(:field_assigned_to) + ": " + issue.assigned_to.name
+                   })
+      link_to(img, :controller => 'issues', :action => 'show', :id => issue)
+    else
+      link_to(image_tag('ticket.png'), :controller => 'issues', :action => 'show', :id => issue)
+    end
+  end
+
   def tracker_to_color(trackerid)
     color = "background-color: "
     if trackerid == @settings['category']['feature']['tracker'].to_i
