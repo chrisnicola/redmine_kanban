@@ -38,7 +38,13 @@ Redmine::Plugin.register :redmine_kanban do
                'testing' => { 'status' => nil, 'limit' => 5},
                'finished' => {'status' => nil, 'limit' => 7},
                'canceled' => {'status' => nil, 'limit' => 7}
-             }
+             },
+             'category' => {
+               'feature' => { 'tracker' => nil, 'color' => nil},
+               'defect' => { 'tracker' => nil, 'color' => nil},
+               'architecture' => { 'tracker' => nil, 'color' => nil},
+               'technicaldebt' => { 'tracker' => nil, 'color' => nil}
+            }
            })
   
   menu(:top_menu,

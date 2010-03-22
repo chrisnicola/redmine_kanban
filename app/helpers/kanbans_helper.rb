@@ -51,7 +51,7 @@ module KanbansHelper
     end
     css
   end
-
+ 
   def issue_icon_link(issue)
     if Setting.gravatar_enabled? && issue.assigned_to
       img = avatar(issue.assigned_to, {
@@ -94,5 +94,22 @@ module KanbansHelper
     visible += column_ratios[:staffed] if column_configured?(:staffed)
     
     return ((column_ratios[column].to_f / visible) * 96).round(2)
+  end
+  
+  # Converts the specific tracker type to the color value set
+  def tracker_to_color(trackerid)
+    color = "background-color: "
+    if trackerid == @settings['category']['feature']['tracker'].to_i
+      color += @settings['category']['feature']['color'].to_s
+    elsif trackerid == @settings['category']['defect']['tracker'].to_i
+      color += @settings['category']['defect']['color'].to_s
+    elsif trackerid == @settings['category']['architecture']['tracker'].to_i
+      color += @settings['category']['architecture']['color'].to_s
+    elsif trackerid == @settings['category']['technicaldebt']['tracker'].to_i
+      color += @settings['category']['technicaldebt']['color'].to_s
+    else
+      color = ""
+    end
+    color
   end
 end

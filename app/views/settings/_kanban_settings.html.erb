@@ -16,7 +16,22 @@ def issue_status_pane(pane_name)
       content_tag(:span, l(:kanban_label_limit), :style => "padding: 0 0.5em 0 3em;") + 
       text_field_tag("settings[panes][#{pane_name}][limit]", limit ))
       return status
+end
+def tracker_color(category_name)
+    selected_tracker = @settings['category'][category_name] && @settings['category'][category_name]['tracker'] ? @settings['category'][category_name]['tracker'].to_i : ''
+    color = @settings['category'][category_name] && @settings['category'][category_name]['color'] ? @settings['category'][category_name]['color'].to_s : ''
+    tracker = content_tag(:p,
+      content_tag(:label, l("kanban_label_#{category_name}".to_sym)) +
+      select_tag("settings[category][#{category_name}][tracker]",
+                 content_tag(:option, '') +
+                 options_from_collection_for_select(Tracker.all,
+                                                    :id,
+                                                    :name,
+                                                    selected_tracker)) +
 
+      content_tag(:span, l(:kanban_label_color), :style => "padding: 0 0.5em 0 3em;") +
+      text_field_tag("settings[category][#{category_name}][color]", color ))
+      return tracker
 end
 %>
 
@@ -74,21 +89,23 @@ end
     <%= content_tag(:span, l(:kanban_label_day_limit), :style => "padding: 0 0.5em 0 3em;") %>
     <%= text_field_tag("settings[panes][finished][limit]", finished_limit ) %>
   </p>
-
   <p>
-    <% canceled_status = @settings['panes']['canceled'] && @settings['panes']['canceled']['status'] ? @settings['panes']['canceled']['status'].to_i : ''    %>
+    <% canceled_status = @settings['panes']['canceled'] && @settings['panes']['canceled']['status'] ? @settings['panes']['canceled']['status'].to_i : '' %>
     <% canceled_limit = @settings['panes']['canceled'] && @settings['panes']['canceled']['limit'] ? @settings['panes']['canceled']['limit'].to_f : '' %>
-
-    <%= content_tag(:label, l("kanban_label_canceled_pane".to_sym)) + 
+ 
+    <%= content_tag(:label, l("kanban_label_canceled_pane".to_sym)) +
       select_tag("settings[panes][canceled][status]",
                  content_tag(:option, '') +
                  options_from_collection_for_select(IssueStatus.all(:conditions => {:is_closed => true}),
                                                     :id,
                                                     :name,
                                                     canceled_status)) %>
-
+ 
     <%= content_tag(:span, l(:kanban_label_day_limit), :style => "padding: 0 0.5em 0 3em;") %>
     <%= text_field_tag("settings[panes][canceled][limit]", canceled_limit ) %>
-  </p>
-
+  </p> 
+   <%= tracker_color('feature') %>
+    <%= tracker_color('defect') %>
+    <%= tracker_color('architecture') %>
+    <%= tracker_color('technicaldebt') %>
 </fieldset>

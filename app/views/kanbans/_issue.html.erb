@@ -1,6 +1,6 @@
 <% if issue %>
 <li id="issue_<%= issue.id %>" class="<%= over_pane_limit?(limit, issue_counter) if defined?(limit) -%> <%= kanban_issue_css_classes(issue) %>">
-  <div class="issue-details">
+  <div class="issue-details" style="<%=tracker_to_color(issue.tracker.id) %>">
     <%= issue_icon_link(issue) %>
     #<%= h(issue.id) %> - <%= h(issue.project.name) %> - <%= h(issue.subject) %>
   </div>
